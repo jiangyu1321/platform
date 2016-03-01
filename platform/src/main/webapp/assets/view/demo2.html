@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html ng-app="demoDirective">
+<head lang="en">
+<meta charset="UTF-8">
+<title>Directive Demo</title>
+</head>
+<body ng-controller="indexController">
+<div>Name:{{name}},Age:{{age}}</div>
+
+<div my-click name="name" age1="age" showMsg="showMsg()" >Click A</div>
+
+<div my-click1 name="name" age1="age" showMsg="showMsg()" value="1">Click1 A</div>
+
+<div my-click1 name="name" age1="age" showMsg="showMsg()" value="2">Click1 B</div>
+
+<div my-click2>Click Directive2</div>
+
+
+<script src="/assets/javascripts/jquery/jquery-1.8.3.min.js"></script>
+<script src="/assets/javascripts/lodash.min.js"></script>
+<script src="/assets/javascripts/angular-1.2.19/angular.js"></script>
+<script>
+	
+	var app = angular.module('demoDirective',[]);
+	app.controller('indexController',['$rootScope','$scope',function($rootScope,$scope){
+		$scope.name='abc';
+		$scope.age='20';
+		$scope.showMsg=function(){
+			console.log($scope.name,$scope.age);
+		};
+	}]);
+	
+	/** 推荐这样写  注入的方式**/
+	app.directive('myClick',['$rootScope',function($rootScope){
+		console.log('myClick init');
+		return {
+			restrict:'EA',//E-Elememt M-注释  A-Attribute C-class
+			scope:{
+				//=,@,&
+				name:'=',//  名字和$scope中的属性名字必须一样【双向绑定】
+				age:'@age1',//@  属性名必须自己定义成自己定义的内容  【单向绑定的】
+				//age:'=age1',//@  属性名必须自己输入  【单向绑定的】
+				showMsg:'&'//表示引用的是函数
+			},//true--有独立的scope,可以和其他指令一起公用   false , {}--独立的，使用F12查看元素   ng-isolate
+			template:'<div>directive my click,{{ name }},{{age}}</div>',//替换directive的内容,单向绑定的时候有问题
+			//templateUrl:'./view/xxx.html',//用于替换上面内容
+			replace:true,//false--作为子元素  true直接替换Click A内容
+			
+			compile:function(element,attrs){
+				console.log('click compile');
+				return {
+					pre:function(){
+						console.log('click pre link');
+					},
+					post:function(){
+						//对应的是下面的link  compile和link两个是冲突的
+						console.log('click post link');
+					}
+				}
+			},
+			
+			link:function(scope,element,attrs){
+				console.log('myclick build');
+				//这是jquery的click方式，所以要使用angular的$applay
+				element.on('click',function(){
+					console.log(element.html());
+					
+					scope.name = 'directive name';
+					scope.age = 30;
+					console.log(scope.name,scope.age);
+					scope.showMsg();
+					
+					//使用angular方式去检查脏读
+					scope.$apply();
+				});
+			}
+		}
+	}]);
+	
+	/** 推荐这样写  注入的方式**/
+	app.directive('myClick1',['$rootScope',function($rootScope){
+		console.log('myClick1 init');
+		return {
+			restrict:'EA',//E-Elememt M-注释  A-Attribute C-class
+			scope:{
+				//=,@,&
+				name:'=',//  名字和$scope中的属性名字必须一样【双向绑定】
+				age:'@age1',//@  属性名必须自己定义成自己定义的内容  【单向绑定的】
+				//age:'=age1',//@  属性名必须自己输入  【单向绑定的】
+				showMsg:'&'//表示引用的是函数
+			},//true--有独立的scope,可以和其他指令一起公用   false , {}--独立的，使用F12查看元素   ng-isolate
+			template:'<div>directive my click,{{ name }},{{age}}</div>',//替换directive的内容,单向绑定的时候有问题
+			replace:false,//false--作为子元素  true直接替换Click A内容
+			link:function(scope,element,attrs){
+				if(attrs.value==='1'){
+					element.find('div').attr('my-click2','');
+				}
+				console.log(attrs);
+			}
+		}
+	}]);
+	
+	app.directive('myClick2',['$rootScope',function($rootScope){
+		return {
+			link:function(scope,element,attr){
+				element.on('click',function(){
+					console.log('click my click 2');
+				});
+			}
+		}
+	}]);
+	
+	
+	
+	
+	//js压缩的时候起到关键作用,
+	
+	function test(name,age){
+		console.info(name,age);
+	}
+	
+	function f(a,b){console.log(a,b);}
+	
+</script>
+</body>
+</html>

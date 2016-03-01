@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html ng-app="demo">
+<head lang="en">
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body ng-controller="indexController">
+
+
+<input ng-model="name">
+
+<div ng-bind="name"></div>
+<button my-alert content="OK,you got me A!">Click A</button>
+
+<button my-alert content="OK,you got me B!">Click B</button>
+
+<div>
+	ID:<input ng-model="newuser.id">
+</div>
+<div>
+	Name:<input ng-model="newuser.name">
+</div>
+<div>
+	Age:<input ng-model="newuse.age">
+</div>
+<div>
+	<button ng-click="onBtnAddUser()">Add User</button>
+</div>
+
+<div class="header" ng-controller="header">
+	<div ng-bind="name"></div>
+</div>
+
+<!-- 绑定字符串常量 -->
+<div class="content" ng-bind="'Angular'"></div>
+<div class="content" ng-bind="getText()"></div>
+
+<!-- 条件判断 -->
+<div ng-if="!$kUser.isLoaded">Loading...</div>
+
+
+<div ng-repeat='user in $kUser.users'>
+	<span ng-bind='user.id'></span>
+	<span ng-bind='user.name'></span>
+	<span ng-bind='user.age'></span>
+</div>
+
+<script src="/assets/javascripts/jquery/jquery-1.8.3.min.js"></script>
+<script src="/assets/javascripts/lodash.min.js"></script>
+<script src="/assets/javascripts/angular-1.2.19/angular.js"></script>
+<script>
+	var app = angular.module("demo",[]);
+	app.controller('header',['$rootScope','$scope',function($rootScope,$scope){
+		$scope.name="header";
+	}]);
+	
+	
+	app.controller('indexController',['$rootScope','$scope','$kUser',function($rootScope,$scope,$kUser){
+		$scope.name="body";
+		
+		$scope.getText=function(){
+			console.info('get text');
+			return "text";
+		}
+		$scope.$kUser = $kUser;
+		$kUser.getList()
+		$scope.newuser={};
+		
+		$scope.onBtnAddUser = function(){
+			$kUser.add($scope.newuser);
+		}
+		 
+	}]);
+	
+	
+	app.directive('myAlert',['$rootScope',function($rootScope){
+		var dialog = $('<div>');
+		dialog.css({
+			'display':'none',
+			'position':'fixed',
+			'left':400,
+			'top':200,
+			'border':'1px solid green',
+			'background-color':'#eee',
+			'z-index':10,
+			'width':500,
+			'height':300
+		});
+		$('body').append(dialog);
+		dialog.click(function(){
+			dialog.hide();
+		});
+		console.log('my-alert init');
+		return {
+			restrict:'A',//E element,A attribute
+			link:function(scope,element,attr){
+				console.log('new my-alert instance');
+				element.on('click',function(){
+					dialog.html(attr.content);
+					dialog.show();
+				});
+			}
+		};
+	}]);
+	
+	/** singleTon **/
+	app.factory('$kUser',['$rootScope',function($rootScope){
+		var _this = {};
+		_this.users = [];
+		_this.isLoaded=false;
+		_this.getList = function(){
+			setTimeout(function(){
+				$rootScope.$apply(function(){
+					for(var i=0;i<5;i++){
+						_this.users.push({
+							id:i,
+							name:'name_'+i,
+							age:i*2
+						});
+					}
+				_this.isLoaded=true;
+				});
+			},3000);
+		}
+		_this.add = function(user){
+			var tmp = _.clone(user);
+			_this.users.push(tmp);
+		}
+		return _this;
+	}]);
+</script>
+</body>
+</html>

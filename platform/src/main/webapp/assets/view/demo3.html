@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html ng-app="demoPromise">
+<head lang="en">
+<meta charset="UTF-8">
+<title>Promise Demo</title>
+</head>
+<body ng-controller="indexController">
+<div>
+	<a href="#class">class</a>
+	<a href="#score">score</a>
+</div>
+<div ng-view></div>
+
+<script src="/assets/javascripts/jquery/jquery-1.8.3.min.js"></script>
+<script src="/assets/javascripts/lodash.min.js"></script>
+<script src="/assets/javascripts/angular-1.2.19/angular.js"></script>
+<script src="/assets/javascripts/angular-1.2.19/angular-route.js"></script>
+<script>
+	var app = angular.module('demoPromise',['ngRoute']);
+	app.config(['$routeProvider',function($routeProvider){
+		$routeProvider.when('/',{
+			redirectTo:'class'
+		}).when('/class',{
+			templateUrl:'/assets/view/class.html',
+			controller:'classController'
+		}).when('/score',{
+			templateUrl:'/assets/view/score.html',
+			controller:'scoreController'
+		});
+	}]);
+	app.controller('indexController',['$rootScope','$scope','$q','$kUser',function($rootScope,$scope,$q,$kUser){
+		$kUser.init().then(function(){
+			console.log("loaded",1,$kUser.id,$kUser.age);
+		});
+		$kUser.loadExtraData().then(function(){
+			console.log("loaded",2,$kUser.id,$kUser.age);
+		});
+	}]);
+	
+	app.controller('classController',['$rootScope','$scope','$q','$kUser',function($rootScope,$scope,$q,$kUser){
+		$kUser.OnLoaded().then(function(){
+			console.log('loading class data,userId='+$kUser.id);
+		});
+	}]);
+	
+	app.controller('scoreController',['$rootScope','$scope','$q','$kUser',function($rootScope,$scope,$q,$kUser){
+		$kUser.OnLoaded().then(function(){
+			console.log('loading score data,userId='+$kUser.id);
+		});
+	}]);
+	
+	app.factory('$kUser',['$rootScope','$q',function($rootScope,$q){
+		var _this = {};
+		var mainDeferred = $q.defer();
+		_this.promise = mainDeferred.promise;
+		_this.init = function(){
+			//模拟耗时操作
+			setTimeout(function(){
+				_this.id=3;
+				_this.name='jjyy';
+				console.log('user data loaded');
+				mainDeferred.resolve();
+			},1000);
+			return _this.promise;
+		};
+		
+		_this.OnLoaded = function(){
+			return _this.promise;
+		};
+		
+		_this.loadExtraData = function(){
+			var deferred = $q.defer();
+			_this.OnLoaded().then(function(){
+				setTimeout(function(){
+					_this.age = 30;
+					console.log('user extra data loaded');
+					deferred.resolve();
+				},100);
+			});
+			return deferred.promise;
+		};
+		
+		
+		
+		return _this;
+	}]);
+	
+	
+	
+	/* 
+	app.controller('indexController',['$rootScope','$scope','$q',function($rootScope,$scope,$q){
+		function LoadData1(){
+			var deferred = $q.defer();
+			setTimeout(function(){
+				console.log('1 is running');
+				deferred.resolve(111);
+			},3000);
+			return deferred.promise;
+		}
+		
+		function LoadData2(){
+			var deferred = $q.defer();
+			//logical code
+			console.log('2 is running');
+			//deferred.resolve(222);
+			deferred.reject(222);
+			return deferred.promise;
+		}
+		
+		function LoadData3(){
+			var deferred = $q.defer();
+			//logical code
+			console.log('3 is running');
+			deferred.resolve(333);
+			return deferred.promise;
+		}
+		
+		
+		LoadData1(function(){
+			LoadData2(function(){
+				LoadData3(function(){
+					//todo something
+				});
+			});
+		});
+		
+		//可以保证按顺序来
+		//showMask();
+		LoadData1()
+				.then(LoadData2)
+				.then(LoadData3)
+				.then(function(){
+					console.log('All done');
+				}).catch(function(error){
+					console.log('error',error);
+				}).finally(function(){
+					console.log('finally');
+					//hideMask();
+				});
+		
+		 $q.all([LoadData1(),LoadData2(),LoadData3()]).then(function(dataArr){
+			console.log(dataArr[0]);
+			console.log(dataArr[1]);
+			console.log(dataArr[2]);
+		});
+	}]); */
+	
+	
+	/* 
+	
+	//回调函数
+	$('div').click(function{
+		//callback
+	});
+	
+	$.get("url",function(data){
+		//....  同步|不同步---socket中的阻塞和非阻塞模式  一般用非阻塞模式用户体验度好
+		console.log('222');
+	});
+	console.log('111');
+	
+	//111--->222
+	
+	//promise  是一种规范
+	
+	 */
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<div>
+	<div>
+		<nav class="navbar navbar-inverse navar-fixed-top">
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="">11</a></li>
+					<li><a href="">22</a></li>
+					<li><a href="">33</a></li>
+				</ul>
+			</div>
+		</nav>
+	</div>
+
+	<div class="input-group">
+		<span>用户名</span>
+		<span class="glyphicon glyphicon-user"></span>
+		<input type="text" ng-model="login.username" placeholder="username">
+
+	</div>
+	<div class="input-group">
+		<span>密&nbsp;&nbsp;&nbsp;&nbsp;码</span>
+		<span class="glyphicon glyphicon-lock"></span>
+		<input type="password" ng-model="login.password" placeholder="password">
+	</div>
+
+	<div>
+		<button ng-click="login.submit($event)"> 提 交 </button>
+	</div>
+
+	<div>
+		<span class="error" ng-bind="login.error"></span>
+	</div>
+</div>
